@@ -1,0 +1,134 @@
+{
+  "projects": [
+    {
+      "num": "001",
+      "cat": "core",
+      "name": "The years between us",
+      "date": "Okt 2025 - Feb 2026",
+      "type": "Interactive application & analog card game",
+      "shortDesc": "A speculative design project exploring transgenerational memory — combining a digital archive with an analogue card game.",
+      "desc": "Some things are passed down. Others are not.\n\n\"Between Us, the Years\" is a bachelor's thesis project exploring the transgenerational transmission of wartime experiences and their lasting effects on family and social relationships in the present day. At its core are the memories, attitudes, and relational patterns that continue to shape us across generations — often without our awareness.\n\nThe project combines an interactive digital application with an analogue dialogue and card game, opening up different ways of engaging with the subject. One part of the project can be experienced online at zwischen-uns-die-jahre.vercel.app",
+      "images": ["./media/001_core_schroeder-alina-01.mp4", "./media/002_core_schroeder-alina-02.mp4", "./media/003_core_schroeder-alina-03.jpg"]
+    },
+    {
+      "num": "002",
+      "cat": "core",
+      "name": "ONDRA",
+      "date": "Mar 2026",
+      "type": "Type of work",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    },
+    {
+      "num": "003",
+      "cat": "core",
+      "name": "all the water above me came from below",
+      "date": "Jun 2025",
+      "type": "Type of work",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    },
+    {
+      "num": "004",
+      "cat": "core",
+      "name": "BTS",
+      "date": "Jun 2025",
+      "type": "Type of work",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    },
+    {
+      "num": "001",
+      "cat": "foundations",
+      "name": "Project Title",
+      "date": "Jan 2026",
+      "type": "Type of work",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    },
+    {
+      "num": "002",
+      "cat": "foundations",
+      "name": "Project Title",
+      "date": "Sep 2025",
+      "type": "Type of work",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    },
+    {
+      "num": "003",
+      "cat": "foundations",
+      "name": "Project Title",
+      "date": "Apr 2025",
+      "type": "Type of work",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    },
+    {
+      "num": "001",
+      "cat": "applied",
+      "name": "Ondra",
+      "date": "Oct 2025",
+      "type": "Interactive web application",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    },
+    {
+      "num": "002",
+      "cat": "applied",
+      "name": "Project Title",
+      "date": "May 2025",
+      "type": "Type of work",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    },
+    {
+      "num": "003",
+      "cat": "applied",
+      "name": "Project Title",
+      "date": "Nov 2024",
+      "type": "Type of work",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    },
+    {
+      "num": "001",
+      "cat": "writing",
+      "name": "Project Title",
+      "date": "Feb 2026",
+      "type": "Type of work",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    },
+    {
+      "num": "002",
+      "cat": "writing",
+      "name": "Project Title",
+      "date": "Aug 2025",
+      "type": "Type of work",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    },
+    {
+      "num": "003",
+      "cat": "writing",
+      "name": "Project Title",
+      "date": "Mar 2025",
+      "type": "Type of work",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    }
+  ]
+}
