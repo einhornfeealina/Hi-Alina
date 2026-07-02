@@ -130,17 +130,17 @@
       "type": "Type of work",
       "shortDesc": "Short description for the project list — one or two sentences.",
       "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
-      "images": []
+      "pdf": "./media/Zwischen uns die Jahre.pdf"
     },
     {
       "num": "002",
       "cat": "writing",
-      "name": "Über Europa und über Selbstbilder",
+      "name": "Ueber Europa und ueber das Erinnern",
       "date": "Jul 2026",
       "type": "Type of work",
       "shortDesc": "Short description for the project list — one or two sentences.",
       "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
-      "images": []
+      "pdf": "./media/Über Europa und über das Erinnern.pdf"
     },
     {
       "num": "003",
