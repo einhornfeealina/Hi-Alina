@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alina Schroeder</title>
+  <style>
+    @font-face {
+      font-family: 'Swiss721';
+      src: url('fonts/Swiss721BT.ttf') format('truetype');
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: 'Swiss721';
+      src: url('fonts/Swiss721Bold.ttf') format('truetype');
+      font-weight: 700;
+    }
+    @font-face {
+      font-family: 'Swiss721';
+      src: url('fonts/Swiss721Black.ttf') format('truetype');
+      font-weight: 900;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+
+    :root {
+      --pad: clamp(16px, 3.5vw, 52px);
+      --bar-h: 100px;
+      --bot-h: 120px;
+      --num-col: clamp(90px, 12vw, 130px);
+      --circ: 64px;       /* bottom-bar circles */
+      --ellipse-h: 52px;  /* category + section ellipses */
+      --row-gap: 28px;
+      --name-offset: calc(var(--pad) + var(--num-col) + var(--circ) + var(--row-gap) * 2);
+    }
+
+    body {
+      font-family: 'Swiss721', Helvetica Neue, Arial, sans-serif;
+      background: #fff;
+      color: #CC00FF;
+      --cat: #CC00FF;
+      -webkit-font-smoothing: antialiased;
+      transition: color 0.22s ease;
+      overflow-x: hidden;
+      cursor: none;
+    }
+    a, button, .project-row, [data-cat] { cursor: none; }
+
+    /* Touch devices: no custom cursor */
+    @media (pointer: coarse) {
+      #cursor { display: none; }
+      body, a, button, .project-row, [data-cat] { cursor: auto; }
+    }
+
+    /* ── Custom cursor ─────────────────────── */
+    #cursor {
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid currentColor;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.18s ease, height 0.18s ease, background 0.18s ease;
+      mix-blend-mode: normal;
+    }
+    #cursor.big {
+      width: 48px;
+      height: 48px;
+    }
+    #cursor.fill {
+      background: var(--cat);
+      border-color: var(--cat);
+    }
+
+    /* ─────────────────────────────────────────────
+       INTRO OVERLAY — fully fixed, no scroll needed
+    ───────────────────────────────────────────── */
+    #intro-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 140;
+      background: #fff;
+      pointer-events: none;
+      will-change: opacity;
+    }
+
+    /* Moving name — centered, nav sits above it */
+    #moving-name {
+      position: fixed;
+      z-index: 155;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      line-height: 1;
+      pointer-events: none;
+      max-width: calc(100vw - var(--pad) - 52px); /* don't overlap mode-toggle */
+      overflow: hidden;
+    }
+
+    /* Welcome text — in page flow, fades in after intro */
+    .hello-text, .glad-text {
+      font-size: clamp(36px, 10vw, 76px);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      padding: 0 var(--pad);
+      opacity: 0;
+    }
+    .hello-text {
+      font-weight: 900;
+      transform: translateY(85vh);
+      transition: opacity 0.4s ease, transform 1.6s cubic-bezier(0.25, 0.1, 0.1, 1);
+    }
+    .hello-text.visible { transform: translateY(0); }
+    .glad-text {
+      font-weight: 400;
+      margin-top: 0.2em;
+      text-transform: none;
+      transition: opacity 0.9s ease 0.5s;
+    }
+    .hello-text.visible { opacity: 1; }
+    .glad-text.visible { opacity: 1; }
+
+    /* ─────────────────────────────────────────────
+       FIXED TOP BAR
+    ───────────────────────────────────────────── */
+    /* ── Dark mode ────────────────────────────── */
+    body.dark {
+      background: #000;
+    }
+    body.dark #top-bar,
+    body.dark #bottom-bar,
+    body.dark .cat-bar,
+    body.dark .section-head,
+    body.dark #detail-page,
+    body.dark #about-page,
+    body.dark .dp-topbar {
+      background: #000;
+    }
+    body.dark #intro-bg { background: #000; }
+
+    /* Mode toggle button — top right */
+    #mode-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      background: none;
+      color: inherit;
+      cursor: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+      z-index: 155;
+      position: relative;
+    }
+    #mode-toggle:hover { background: var(--cat); color: #fff; }
+    #mode-toggle svg { width: 16px; height: 16px; }
+
+    #top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 130;
+      height: var(--bar-h);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 var(--pad);
+      background: #fff;
+      transition: background 0.3s ease;
+    }
+
+    #top-bar-border {
+      position: fixed;
+      top: var(--bar-h);
+      left: 0; right: 0;
+      z-index: 130;
+      height: 1px;
+      background: currentColor;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    #top-bar-border.visible { opacity: 1; }
+
+    /* Bar name marquee — aligned with project name column */
+    #bar-name-marquee {
+      position: absolute;
+      left: var(--pad);
+      right: calc(var(--pad) + 40px + 10px);
+      top: 0; bottom: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+      z-index: 154;
+    }
+    #bar-name-marquee.visible { opacity: 1; }
+    .bnm-inner {
+      display: inline-block;
+      white-space: nowrap;
+      font-size: clamp(16px, 5.5vw, 76px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .tb-right { display: none; }
+
+    /* ─────────────────────────────────────────────
+       FIXED BOTTOM BAR
+    ───────────────────────────────────────────── */
+    #bottom-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 130;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      padding: clamp(14px, 2vw, 22px) var(--pad);
+      background: #fff;
+      border-top: 1px solid currentColor;
+      gap: clamp(12px, 2vw, 28px);
+      transition: background 0.3s ease;
+    }
+    .bb-left { display: flex; gap: clamp(8px, 1.2vw, 18px); align-items: center; }
+    .bb-btn {
+      width: var(--circ); height: var(--circ);
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      background: none;
+      color: inherit;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0em;
+      text-transform: uppercase;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      white-space: normal;
+      line-height: 1.2;
+      transition: background 0.15s, color 0.15s;
+    }
+    .bb-btn:hover { background: var(--cat); color: #fff; }
+
+    .bb-ticker {
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1.5;
+      white-space: normal;
+    }
+    .bb-ticker-inner { display: block; }
+
+    .bb-right { display: flex; gap: clamp(8px, 1.2vw, 18px); align-items: center; }
+    .bb-navbtn {
+      font-family: inherit;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: none;
+      border: 1.5px solid currentColor;
+      border-radius: 50px;
+      padding: 0 13px;
+      height: 34px;
+      color: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      transition: opacity 0.15s;
+    }
+
+    /* ─────────────────────────────────────────────
+       MAIN
+    ───────────────────────────────────────────── */
+    #main {
+      padding-top: var(--bar-h);
+      padding-bottom: calc(var(--bot-h) + 1px);
+    }
+
+    /* Hero — 100vh, text sits near bottom so gap to categories is minimal */
+    .hero {
+      height: 100vh;
+      box-sizing: border-box;
+      padding-top: 0;
+      padding-bottom: var(--bar-h);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    /* ── Category bar — sticky below top bar ──── */
+    .cat-bar {
+      position: sticky;
+      top: var(--bar-h);
+      z-index: 120;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: clamp(14px, 2.5vw, 32px);
+      padding: clamp(28px, 4vw, 52px) var(--pad);
+    }
+    .cat-btn {
+      flex: 1;
+      min-width: 0;
+      height: var(--ellipse-h);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: none;
+      border: 1.5px solid currentColor;
+      border-radius: 50%;
+      cursor: pointer;
+      color: inherit;
+      text-align: center;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cat-btn:hover, .cat-btn.active { background: var(--cat); color: #fff; border-color: var(--cat); }
+
+    /* ── Project list ─────────────────────────── */
+    .projects { display: flex; flex-direction: column; margin-top: clamp(32px, 5vw, 72px); }
+    .project-row {
+      border-bottom: 1px solid currentColor;
+      cursor: pointer;
+      color: inherit;
+      text-decoration: none;
+    }
+    .project-row:first-child { border-top: 1px solid currentColor; }
+    .project-row[hidden] { display: none; }
+
+    .row-main {
+      display: grid;
+      grid-template-columns: var(--num-col) var(--circ) minmax(0, 1fr);
+      align-items: center;
+      gap: var(--row-gap);
+      padding: 10px var(--pad);
+    }
+    .row-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding-bottom 0.35s ease;
+      padding: 0 var(--pad) 0 var(--name-offset);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .project-row:hover .row-details {
+      max-height: 200px;
+      padding-bottom: 20px;
+    }
+    .row-meta {
+      display: flex;
+      gap: clamp(16px, 3vw, 48px);
+      align-items: baseline;
+    }
+    .row-desc { margin-top: 4px; }
+
+    .row-num {
+      font-size: clamp(36px, 10vw, 76px);
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      opacity: 1;
+    }
+    .row-circle {
+      width: var(--circ);
+      height: var(--circ);
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .row-circle:hover { background: var(--cat); color: #fff; }
+    .row-name {
+      font-size: clamp(36px, 10vw, 76px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      line-height: 1;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .rn-scroll {
+      display: inline-block;
+      white-space: nowrap;
+      animation: rn-marquee 28s linear infinite;
+      will-change: transform;
+    }
+    @keyframes rn-marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .row-type {
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+    .row-year {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .row-desc {
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1.5;
+      max-width: 540px;
+    }
+
+    /* ── Section pill label (About / Contact) — sticky header ── */
+    .section-head {
+      position: sticky;
+      top: var(--bar-h);
+      z-index: 110;
+      background: #fff;
+      padding: clamp(28px, 4vw, 52px) var(--pad);
+      display: flex;
+      align-items: center;
+    }
+    .section-pill {
+      /* Same width as one cat-btn (100% = section-head content = viewport - 2×pad, matching cat-bar) */
+      width: calc((100% - 3 * clamp(14px, 2.5vw, 32px)) / 4);
+      height: var(--ellipse-h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid currentColor;
+      border-radius: 50%;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: background 0.15s, color 0.15s;
+    }
+    button.section-pill { background: none; color: inherit; font-family: inherit; cursor: none; border-color: currentColor; }
+    button.section-pill:hover { background: var(--cat); color: #fff; border-color: var(--cat); }
+
+    /* ── About ────────────────────────────────── */
+    .about {
+      padding: clamp(40px, 6vw, 90px) 0 clamp(40px, 5.5vw, 80px);
+      border-bottom: 1px solid currentColor;
+    }
+    .about p {
+      padding: clamp(40px, 6vw, 90px) var(--pad) 0;
+      font-size: clamp(36px, 10vw, 76px);
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      hyphens: auto;
+      -webkit-hyphens: auto;
+    }
+
+    /* ── Contact — no border top/bottom ─────── */
+    .contact {
+      padding: clamp(40px, 6vw, 90px) 0 clamp(44px, 6vw, 80px);
+    }
+    .contact-grid {
+      padding: clamp(40px, 6vw, 90px) var(--pad) 0;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(6px, 1vw, 14px);
+    }
+    .contact-row {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: baseline;
+      gap: 0.2em;
+      text-decoration: none;
+      color: inherit;
+      transition: opacity 0.15s;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .cr-abbr, .cr-spacer, .cr-pre, .cr-main, .cr-suf {
+      font-size: clamp(36px, 10vw, 76px);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+    .cr-abbr { flex-shrink: 0; margin-right: clamp(20px, 3vw, 48px); }
+    .cr-spacer { display: none; }
+    .cr-pre { flex-shrink: 0; }
+    .cr-main { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .cr-suf { flex-shrink: 0; }
+
+    /* ── Footer ───────────────────────────────── */
+    footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px var(--pad);
+    }
+    footer span {
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: inherit;
+      align-self: center;
+    }
+    #back-up {
+      width: var(--circ);
+      height: var(--circ);
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      color: inherit;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    #back-up:hover { background: var(--cat); color: #fff; }
+    #back-up svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ── Imprint ──────────────────────────────── */
+    .imprint {
+      border-top: 1px solid currentColor;
+      padding: clamp(40px, 5vw, 80px) var(--pad) calc(var(--bot-h) + clamp(40px, 5vw, 80px));
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .imprint-section {
+      margin-bottom: clamp(32px, 4vw, 56px);
+    }
+    .imprint h2 {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .imprint p, .imprint li {
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1.7;
+    }
+    .imprint ul {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0;
+    }
+    .imprint li::before { content: '— '; }
+
+    /* ── Topbar name — clickable when visible ── */
+    #bar-name-marquee.visible { pointer-events: auto; cursor: none; }
+
+    /* ── About Page ───────────────────────────── */
+    #about-page {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: #fff;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      transform: translateY(100%);
+      transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.1, 1);
+    }
+    #about-page.open { transform: translateY(0); }
+    #about-page.closing { transform: translateY(100%); }
+
+    .ap-body {
+      padding: clamp(40px, 6vw, 80px) var(--pad) clamp(60px, 10vw, 120px);
+    }
+    .ap-name {
+      font-size: clamp(36px, 10vw, 76px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      line-height: 1;
+      margin-bottom: clamp(24px, 4vw, 48px);
+    }
+    .ap-bio {
+      font-size: clamp(36px, 10vw, 76px);
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      hyphens: auto;
+      -webkit-hyphens: auto;
+      margin-bottom: clamp(40px, 6vw, 80px);
+    }
+    /* photo strip */
+    .ap-photos {
+      display: flex;
+      gap: clamp(10px, 1.5vw, 18px);
+      margin-bottom: clamp(40px, 6vw, 80px);
+    }
+    .ap-photo {
+      flex: 1;
+      aspect-ratio: 3/4;
+      border: 1.5px solid currentColor;
+      border-radius: clamp(8px, 1.5vw, 20px);
+      overflow: hidden;
+    }
+    .ap-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .ap-photo-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.3;
+    }
+    .ap-section {
+      border-top: 1px solid currentColor;
+      padding-top: clamp(28px, 4vw, 52px);
+      margin-bottom: clamp(32px, 5vw, 64px);
+    }
+    /* section heading — exact same width as one cat-btn */
+    .ap-heading {
+      width: calc((100% - 3 * clamp(14px, 2.5vw, 32px)) / 4);
+      height: var(--ellipse-h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid currentColor;
+      border-radius: 50%;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: clamp(20px, 3vw, 36px);
+    }
+    .ap-timeline { display: flex; flex-direction: column; gap: clamp(16px, 2.5vw, 28px); }
+    .ap-entry { display: grid; grid-template-columns: clamp(90px, 14vw, 160px) 1fr; gap: clamp(12px, 2vw, 24px); }
+    .ap-year {
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding-top: 3px;
+    }
+    .ap-entry-body { display: flex; flex-direction: column; gap: 6px; }
+    .ap-entry-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1.3;
+    }
+    .ap-entry-sub {
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    /* tools / skills plain text list */
+    .ap-list {
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 2;
+    }
+
+    /* pills — identical to cat-btn */
+    .ap-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(8px, 1.5vw, 14px);
+    }
+    .ap-pill {
+      flex: 0 0 auto;
+      padding: 0 clamp(20px, 3vw, 40px);
+      min-width: 0;
+      height: var(--ellipse-h);
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* ── Project Detail Page ──────────────────── */
+    #detail-page {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: #fff;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      transform: translateY(100%);
+      transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.1, 1);
+    }
+    #detail-page.open {
+      transform: translateY(0);
+    }
+    #detail-page.closing {
+      transform: translateY(100%);
+    }
+
+    /* detail top bar */
+    .dp-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #fff;
+      height: var(--bar-h);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: clamp(10px, 2vw, 20px);
+      padding: 0 var(--pad);
+      border-bottom: 1px solid currentColor;
+    }
+    .dp-topbar-gap { flex: 1; }
+    .dp-mode-toggle {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      background: none; color: inherit; cursor: none;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .dp-mode-toggle:hover { background: var(--cat); color: #fff; }
+    .dp-mode-toggle svg { width: 16px; height: 16px; }
+    /* Back as circle */
+    .dp-back {
+      width: var(--circ);
+      height: var(--circ);
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      background: none;
+      font-family: inherit;
+      color: inherit;
+      cursor: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .dp-back:hover { background: var(--cat); color: #fff; }
+    .dp-back svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .dp-cat-pill {
+      height: var(--ellipse-h);
+      padding: 0 clamp(20px, 3vw, 40px);
+      border: 1.5px solid currentColor;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .dp-body {
+      padding: clamp(40px, 6vw, 80px) var(--pad) calc(var(--bot-h) + 80px);
+    }
+
+    /* Number flows inline before title — no paragraph gap */
+    .dp-headline {
+      margin-bottom: clamp(24px, 4vw, 48px);
+      line-height: 1;
+    }
+    .dp-num {
+      font-size: clamp(36px, 10vw, 76px);
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      display: inline;
+      margin-right: 0.35em;
+    }
+    .dp-title {
+      font-size: clamp(36px, 10vw, 76px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      display: inline;
+      line-height: 1;
+    }
+    .dp-meta {
+      display: flex;
+      gap: clamp(20px, 4vw, 60px);
+      align-items: baseline;
+      margin-bottom: clamp(24px, 4vw, 48px);
+      padding: 0;
+    }
+    .dp-meta-item {
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    /* First image (wide) */
+    .dp-img-wide {
+      aspect-ratio: 16/9;
+      border: 1.5px solid currentColor;
+      border-radius: clamp(8px, 1.5vw, 20px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.3;
+      margin-bottom: clamp(40px, 6vw, 80px);
+    }
+    /* Description text, 76px */
+    .dp-desc {
+      font-size: clamp(36px, 10vw, 76px);
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: clamp(48px, 8vw, 100px);
+      white-space: pre-line;
+    }
+    /* Project link */
+    .dp-link {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1.5px solid currentColor;
+      padding-bottom: 2px;
+      margin-bottom: clamp(40px, 6vw, 80px);
+      transition: opacity 0.15s;
+    }
+    .dp-link:hover { opacity: 0.5; }
+
+
+    /* Image gallery */
+    .dp-gallery {
+      margin-bottom: clamp(40px, 6vw, 80px);
+    }
+    .dp-gallery-frame {
+      width: fit-content;
+      max-width: 100%;
+      border: 1.5px solid currentColor;
+      border-radius: clamp(8px, 1.5vw, 20px);
+      margin-bottom: clamp(16px, 2vw, 28px);
+      overflow: hidden;
+    }
+    .dp-gallery-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: calc(100vw - 2 * var(--pad) - 2px);
+      height: 200px;
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.3;
+    }
+    .dp-gallery-frame img,
+    .dp-gallery-frame video {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 70vh;
+    }
+    .dp-gallery-nav {
+      display: flex;
+      align-items: center;
+      gap: clamp(12px, 2vw, 24px);
+    }
+    .dp-gallery-btn {
+      width: var(--circ);
+      height: var(--circ);
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      background: none;
+      font-family: inherit;
+      font-size: 18px;
+      color: inherit;
+      cursor: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .dp-gallery-btn:hover { background: var(--cat); color: #fff; }
+    .dp-gallery-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .dp-gallery-counter {
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    /* Next — circle + title */
+    .dp-next {
+      border-top: 1px solid currentColor;
+      padding-top: clamp(24px, 4vw, 48px);
+      display: flex;
+      align-items: center;
+      gap: clamp(16px, 3vw, 48px);
+    }
+    .dp-next-circle {
+      width: var(--circ);
+      height: var(--circ);
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      background: none;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: inherit;
+      cursor: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .dp-next-circle:hover { background: var(--cat); color: #fff; }
+    .dp-next-title {
+      font-size: clamp(32px, 5vw, 64px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      line-height: 1;
+      cursor: none;
+      background: none;
+      border: none;
+      font-family: inherit;
+      color: inherit;
+      padding: 0;
+      text-align: left;
+    }
+    .dp-next-title:hover { opacity: 0.6; }
+
+    /* ── Responsive ───────────────────────────── */
+    @media (max-width: 640px) {
+      :root {
+        --circ: 50px;
+        --ellipse-h: 44px;
+        --bar-h: 76px;
+        --bot-h: 96px;
+        --num-col: clamp(64px, 18vw, 90px);
+        --row-gap: 12px;
+      }
+
+
+      /* Cat bar: 4 in one row, same proportions as section pills */
+      .cat-bar {
+        flex-wrap: nowrap;
+        gap: 8px;
+        padding: clamp(28px, 4vw, 52px) var(--pad);
+      }
+      .cat-btn {
+        flex: 1 1 0;
+        min-width: 0;
+        font-size: 10px;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        overflow: hidden;
+        padding: 0 4px;
+      }
+
+      /* Bottom bar: hide ticker, distribute circles evenly */
+      #bottom-bar {
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        gap: 0;
+        padding: 10px var(--pad);
+      }
+      .bb-ticker { display: none; }
+      .bb-left, .bb-right { display: contents; }
+      .bb-btn { font-size: 11px; letter-spacing: 0; }
+
+      /* Detail page body padding */
+      .dp-body {
+        padding: clamp(24px, 5vw, 48px) var(--pad) calc(var(--bot-h) + 48px);
+      }
+
+      /* Section pill: same formula as cat-btn */
+      .section-pill {
+        width: calc((100% - 3 * 8px) / 4);
+      }
+
+      /* Hero: full height on mobile too, text centered */
+      .hero {
+        height: 100vh;
+        height: 100svh;
+      }
+      /* Reduce hello-text slide distance to match shorter hero */
+      .hello-text {
+        transform: translateY(40vh);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom cursor -->
+  <div id="cursor"></div>
+
+  <!-- ── About page overlay ───────────────────── -->
+  <div id="about-page" aria-hidden="true">
+    <div class="dp-topbar">
+      <button class="dp-back" id="ap-back-btn">
+        <svg viewBox="0 0 18 18"><line x1="14" y1="9" x2="4" y2="9"/><polyline points="9,4 4,9 9,14"/></svg>
+      </button>
+      <span class="dp-topbar-gap"></span>
+      <button id="ap-mode-toggle" class="dp-mode-toggle" title="Toggle dark / light mode" aria-label="Toggle dark mode">
+        <svg id="ap-mode-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 2 A6 6 0 0 1 8 14 Z" fill="currentColor"/>
+          <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </button>
+    </div>
+    <div class="ap-body">
+      <h1 class="ap-name">Alina Schroeder</h1>
+      <p class="ap-bio">Works at the intersection of interactive systems, design research, and storytelling — in the digital, in space, sometimes in both at once. Her projects begin with real questions: How does war continue to shape us across generations? How do you make climate change felt without overwhelming? How does an AI learn — and what does that say about us? What remains when things go untold? For her, design is a way of making complexity not explainable, but experienceable.</p>
+      <div class="ap-photos">
+        <div class="ap-photo"><div class="ap-photo-placeholder">Photo</div></div>
+        <div class="ap-photo"><div class="ap-photo-placeholder">Photo</div></div>
+        <div class="ap-photo"><div class="ap-photo-placeholder">Photo</div></div>
+      </div>
+
+      <div class="ap-section">
+        <h2 class="ap-heading">Education</h2>
+        <div class="ap-timeline">
+          <div class="ap-entry">
+            <span class="ap-year">2026 – now</span>
+            <div class="ap-entry-body">
+              <span class="ap-entry-title">MA Applied Design Research</span>
+              <span class="ap-entry-sub">Munich University of Applied Sciences</span>
+            </div>
+          </div>
+          <div class="ap-entry">
+            <span class="ap-year">2022 – 2026</span>
+            <div class="ap-entry-body">
+              <span class="ap-entry-title">BA Photography & Design</span>
+              <span class="ap-entry-sub">Munich University of Applied Sciences</span>
+            </div>
+          </div>
+          <div class="ap-entry">
+            <span class="ap-year">2020 – 2022</span>
+            <div class="ap-entry-body">
+              <span class="ap-entry-title">BA German Studies & Art and Cultural History</span>
+              <span class="ap-entry-sub">University of Augsburg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ap-section">
+        <h2 class="ap-heading">Experience</h2>
+        <div class="ap-timeline">
+          <div class="ap-entry">
+            <span class="ap-year">2024 – now</span>
+            <div class="ap-entry-body">
+              <span class="ap-entry-title">Graphic Designer</span>
+              <span class="ap-entry-sub">LeitWerk AG · Marketing & Branding</span>
+            </div>
+          </div>
+          <div class="ap-entry">
+            <span class="ap-year">2023 – 2024</span>
+            <div class="ap-entry-body">
+              <span class="ap-entry-title">Photographer & Graphic Designer</span>
+              <span class="ap-entry-sub">Funktory · Branding</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ap-section">
+        <h2 class="ap-heading">Tools</h2>
+        <p class="ap-list">After Effects · Premiere Pro · Illustrator · InDesign · Photoshop · Lightroom · Adobe Audition · Framer · Spline · Brackets</p>
+      </div>
+
+      <div class="ap-section">
+        <h2 class="ap-heading">Skills</h2>
+        <p class="ap-list">Motion Design · Interaction · Design Research · Concept Development · Photo & Film · Knowledge Transfer · Writing · Design for Understanding · DJing · Tattooing</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Project detail page overlay ─────────── -->
+  <div id="detail-page" aria-hidden="true">
+    <div class="dp-topbar">
+      <button class="dp-back" id="dp-back-btn">
+        <svg viewBox="0 0 18 18"><line x1="14" y1="9" x2="4" y2="9"/><polyline points="9,4 4,9 9,14"/></svg>
+      </button>
+      <span class="dp-topbar-gap"></span>
+      <span class="dp-cat-pill" id="dp-cat-pill"></span>
+      <button id="dp-mode-toggle" class="dp-mode-toggle" title="Toggle dark / light mode" aria-label="Toggle dark mode">
+        <svg id="dp-mode-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 2 A6 6 0 0 1 8 14 Z" fill="currentColor"/>
+          <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </button>
+    </div>
+    <div class="dp-body">
+      <div class="dp-headline">
+        <span class="dp-num" id="dp-num"></span>
+        <h1 class="dp-title" id="dp-title"></h1>
+      </div>
+      <div class="dp-meta">
+        <div class="dp-meta-item" id="dp-date"></div>
+        <div class="dp-meta-item" id="dp-type"></div>
+      </div>
+      <p class="dp-desc" id="dp-desc"></p>
+      <a class="dp-link" id="dp-link" href="#" target="_blank" rel="noopener" hidden>Visit Project ↗</a>
+      <div class="dp-gallery" id="dp-gallery">
+        <div class="dp-gallery-frame" id="dp-gallery-frame">Image</div>
+        <div class="dp-gallery-nav">
+          <button class="dp-gallery-btn" id="dp-gal-prev">
+            <svg viewBox="0 0 18 18"><line x1="14" y1="9" x2="4" y2="9"/><polyline points="9,4 4,9 9,14"/></svg>
+          </button>
+          <span class="dp-gallery-counter" id="dp-gal-counter">1 / 3</span>
+          <button class="dp-gallery-btn" id="dp-gal-next">
+            <svg viewBox="0 0 18 18"><line x1="4" y1="9" x2="14" y2="9"/><polyline points="9,4 14,9 9,14"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="dp-next">
+        <button class="dp-next-circle" id="dp-next-btn">Next</button>
+        <button class="dp-next-title" id="dp-next-title"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Intro overlay ───────────────────────── -->
+  <div id="intro-bg"></div>
+  <div id="moving-name">Alina Schroeder</div>
+
+  <!-- ── Fixed top bar ──────────────────────── -->
+  <header id="top-bar">
+    <div id="bar-name-marquee"></div>
+    <button id="mode-toggle" title="Toggle dark / light mode" aria-label="Toggle dark mode">
+      <!-- sun half = light, moon = dark; toggled via JS class -->
+      <svg id="mode-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- half circle: light mode icon -->
+        <path d="M8 2 A6 6 0 0 1 8 14 Z" fill="currentColor"/>
+        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+    </button>
+  </header>
+  <div id="top-bar-border"></div>
+
+  <!-- ── Main content ───────────────────────── -->
+  <main id="main">
+  <div id="content-wrap">
+
+    <section class="hero">
+      <p class="hello-text">Hello :)</p>
+      <p class="glad-text">Glad you stepped by&nbsp;— now scroll.</p>
+    </section>
+
+    <section id="work">
+      <div class="cat-bar">
+        <button class="cat-btn active" data-cat="core">Core Projects</button>
+        <button class="cat-btn" data-cat="foundations">Foundations</button>
+        <button class="cat-btn" data-cat="applied">Applied Design</button>
+        <button class="cat-btn" data-cat="writing">Writing</button>
+      </div>
+
+      <div class="projects" id="projects-list">
+        <!-- rendered by initProjects() from content/projects.json -->
+      </div>
+    </section>
+
+    <section class="about" id="about">
+      <div class="section-head"><button class="section-pill" id="about-section-btn">About</button></div>
+      <p>I work at the intersection of motion design, interactive systems, and visual storytelling — exploring how visual and interactive experiences communicate complex ideas through structure, clarity, and time-based design.</p>
+    </section>
+
+    <section class="contact" id="contact">
+      <div class="section-head"><span class="section-pill">Contact</span></div>
+      <div class="contact-grid">
+        <a href="mailto:hi-alina@gmx.de" class="contact-row">
+          <span class="cr-abbr">M</span>
+          <span class="cr-spacer">x</span>
+          <span class="cr-pre">hi-alina</span>
+          <span class="cr-main">@gmx</span>
+          <span class="cr-suf">.de</span>
+        </a>
+        <a href="https://instagram.com/einhornfeealina" target="_blank" rel="noopener" class="contact-row">
+          <span class="cr-abbr">IG</span>
+          <span class="cr-spacer">x</span>
+          <span class="cr-pre"></span>
+          <span class="cr-main">@einhornfeealina</span>
+          <span class="cr-suf"></span>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      <span>© 2026 Alina Schroeder</span>
+      <a id="back-up" title="Back to top">
+        <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+          <line x1="9" y1="14" x2="9" y2="4"/>
+          <polyline points="4,9 9,4 14,9"/>
+        </svg>
+      </a>
+    </footer>
+
+    <div class="imprint">
+
+      <div class="imprint-section">
+        <h2>Imprint</h2>
+        <p>Alina Schroeder</p>
+        <p>[Street, Nr.]</p>
+        <p>[City, Country]</p>
+      </div>
+
+      <div class="imprint-section">
+        <h2>Disclaimer</h2>
+        <p>© 2026 / All works' copyrights are owned by Alina Schroeder.</p>
+        <p>You are not authorised to use any material (neither graphics nor audio) for either commercial or personal, non-commercial purposes and therefore may not download, print or store copies of it.</p>
+        <p>You may not charge anyone for use of the material, and you may not publish, retransmit or otherwise distribute the material to others without prior written consent from Alina Schroeder. You may not modify the material in any way, without the prior written permission from Alina Schroeder. Except as expressly stated in this legal notice, no rights or licenses to the material, or any portion thereof, shall be granted or implied. For press inquiries, please contact hi-alina@gmx.de</p>
+      </div>
+
+      <div class="imprint-section">
+        <h2>Privacy Policy</h2>
+        <p>Alina Schroeder, as the operator of this website, strives to verify the published information accurately and undertakes best efforts to maintain the information relevant, unmitigated and correct. Nevertheless, no liability whatsoever is accepted for damage that may result from the use (or disuse) of the information provided on this website.</p>
+        <p>This website also contains links to external websites, which are controlled by third parties beyond our influence. The same applies to external websites which refer to this website via hyperlinks.</p>
+        <p>The protection and safety of your personal data has utmost priority. This website does not analyse or collect data from visitors, and does not use cookies. Your data will be used exclusively on the basis of the applicable legal provisions, in particular the General Data Protection Regulation (GDPR).</p>
+      </div>
+
+      <div class="imprint-section">
+        <h2>1. Contact Details</h2>
+        <p>Alina Schroeder</p>
+        <p>E-Mail: hi-alina@gmx.de</p>
+      </div>
+
+      <div class="imprint-section">
+        <h2>2. Personal Data</h2>
+        <p>All data containing information about personal or factual circumstances, such as name, address, e-mail address, telephone number, date of birth, age, gender, social security number, video recordings, photos and voice recordings of persons, are personal data within the meaning of data protection law.</p>
+      </div>
+
+      <div class="imprint-section">
+        <h2>3. Purposes of Data Processing</h2>
+        <p>Data is processed for the following purposes:</p>
+        <ul>
+          <li>Processing and transmission of personal data in the context of content submissions / potential collaborations;</li>
+          <li>Operation and optimization of this website;</li>
+          <li>Marketing activities.</li>
+        </ul>
+      </div>
+
+      <div class="imprint-section">
+        <h2>4. Third-Party Disclosure</h2>
+        <p>Personal information is not sold or traded to outside parties. Data processing for the operation and optimisation of this website is based on the legitimate interest in accordance to Art 6 Para 1 Lit F DSGVO.</p>
+      </div>
+
+      <div class="imprint-section">
+        <h2>5. Duration of Data Storage</h2>
+        <p>Personal data which are processed are only stored until the purpose for which they are processed has been fulfilled and as long as needed to fulfil contractual and/or legal obligations. When personal information is no longer needed, it is deleted from the system and records or made anonymous.</p>
+      </div>
+
+      <div class="imprint-section">
+        <h2>6. Your Rights</h2>
+        <p>As a person affected by data processing within the meaning of data protection law, you have the following rights:</p>
+        <ul>
+          <li>Information about your processed personal data;</li>
+          <li>Correction or deletion or limitation of processing;</li>
+          <li>Right to object against the processing;</li>
+          <li>Right to data portability.</li>
+        </ul>
+        <p>You may also complain to a data protection supervisory authority.</p>
+      </div>
+
+      <div class="imprint-section">
+        <h2>7. Social Plugins</h2>
+        <p>This website does not contain social plugins.</p>
+      </div>
+
+      <div class="imprint-section">
+        <h2>8. Web Analysis</h2>
+        <p>This website does not use functions of any web analysis service.</p>
+      </div>
+
+      <div class="imprint-section">
+        <h2>9. Data Security</h2>
+        <p>The security of your data is very important. Appropriate technical and organisational security measures are taken in accordance with Article 32 DSGVO. Notwithstanding efforts to maintain a consistently high level of due diligence, the possibility cannot be excluded that information provided via the internet may be viewed and used by others. No liability is accepted for the disclosure of information due to errors in data transmission and/or unauthorized access by third parties.</p>
+      </div>
+
+      <div class="imprint-section">
+        <h2>10. Changes to This Privacy Policy</h2>
+        <p>This data protection declaration will continue to be adapted due to ongoing development. Changes will be announced on this website in due time. You should regularly access this declaration in order to inform yourself about the current version.</p>
+      </div>
+
+    </div>
+  </div><!-- #content-wrap -->
+  </main>
+
+  <!-- ── Fixed bottom bar ────────────────────── -->
+  <div id="bottom-bar">
+    <div class="bb-left">
+      <button class="bb-btn">Prev</button>
+      <button class="bb-btn">Next</button>
+    </div>
+    <div class="bb-ticker" aria-hidden="true">
+      <span class="bb-ticker-inner">Interactive Systems · Motion Design · Visual Storytelling · Interface Design · Time-Based Design · Branding · Applied Design Research</span>
+    </div>
+    <div class="bb-right">
+      <button class="bb-btn" data-section="work">Work</button>
+      <button class="bb-btn" data-section="about">About</button>
+      <button class="bb-btn" data-section="contact">Con-<br>tact</button>
+    </div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  /* ── Prevent any URL hash → scroll jump ─── */
+  history.scrollRestoration = 'manual';
+  /* Immediately kill any hash in URL so reload won't jump */
+  if (location.hash) history.replaceState(null, '', location.pathname);
+  window.scrollTo(0, 0);
+
+  /* ── Smooth scroll via data-section (no hash) ── */
+  document.querySelectorAll('[data-section]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.getElementById(el.dataset.section);
+      if (target) {
+        const barH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) || 70;
+        const y = target.getBoundingClientRect().top + window.scrollY - barH;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    });
+  });
+
+  document.getElementById('back-up').addEventListener('click', e => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  /* ── Custom cursor ──────────────────────── */
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top  = e.clientY + 'px';
+  });
+  document.addEventListener('mouseover', e => {
+    const hoverable = e.target.closest('a, button, .project-row, .row-circle, .dp-next-title');
+    cursor.classList.toggle('big', !!hoverable);
+    cursor.classList.toggle('fill', e.target.closest('.row-circle, #back-up, .bb-btn, .dp-back, .dp-back svg') !== null);
+  });
+  document.addEventListener('mouseleave', () => { cursor.style.opacity = '0'; });
+  document.addEventListener('mouseenter', () => { cursor.style.opacity = '1'; });
+
+  /* ── Category switching ─────────────────── */
+  const COLORS = {
+    core: '#CC00FF', foundations: '#FF0099',
+    applied: '#00CC00', writing: '#0000FF',
+  };
+  const DARK_COLORS = { writing: '#5157FF' };
+  const btns = document.querySelectorAll('.cat-btn');
+  let rows = [];
+
+  let currentCat = 'core';
+  function activate(cat) {
+    currentCat = cat;
+    const isDark = document.body.classList.contains('dark');
+    const color = (isDark && DARK_COLORS[cat]) ? DARK_COLORS[cat] : COLORS[cat];
+    document.body.style.color = color;
+    document.body.style.setProperty('--cat', color);
+    btns.forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+    rows.forEach(r => {
+      if (r.dataset.cat === cat) r.removeAttribute('hidden');
+      else r.setAttribute('hidden', '');
+    });
+  }
+  btns.forEach(b => b.addEventListener('click', () => activate(b.dataset.cat)));
+
+  function initProjects() {
+    const list = document.getElementById('projects-list');
+    list.innerHTML = PROJECTS.map((p, i) => `
+      <div class="project-row" data-cat="${p.cat}" data-id="${i}"${i > 0 && PROJECTS[0].cat !== p.cat && (i === 0 || PROJECTS[i-1].cat !== p.cat) ? '' : ''}>
+        <div class="row-main"><span class="row-num">${p.num}</span><span class="row-circle">More</span><span class="row-name">${p.name}</span></div>
+        <div class="row-details">
+          <div class="row-meta"><span class="row-year">${p.date}</span><span class="row-type">${p.type}</span></div>
+          <span class="row-desc">${p.shortDesc || p.desc}</span>
+        </div>
+      </div>`).join('');
+
+    rows = [...list.querySelectorAll('.project-row')];
+
+    /* marquee for row names — fill width, consistent speed */
+    list.querySelectorAll('.row-name').forEach(el => {
+      const text = el.textContent.trim();
+      const sep  = '    —    '; /* nbsp — nbsp */
+      const unit = text + sep;
+      /* measure one unit */
+      const tmp = document.createElement('span');
+      tmp.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font:inherit;font-size:clamp(36px,10vw,76px);font-weight:900;letter-spacing:-0.03em;text-transform:uppercase';
+      tmp.textContent = unit;
+      document.body.appendChild(tmp);
+      const unitW = tmp.offsetWidth || 1;
+      document.body.removeChild(tmp);
+      const containerW = el.offsetWidth || window.innerWidth;
+      /* need at least 2× container width, even number of units */
+      let n = Math.ceil(containerW * 2 / unitW);
+      if (n < 2) n = 2;
+      if (n % 2 !== 0) n++;
+      const content = unit.repeat(n);
+      const span = document.createElement('span');
+      span.className = 'rn-scroll';
+      span.textContent = content;
+      /* duration scales with name length: short = fast, long = slow */
+      const dur = Math.max(4, Math.min(40, unitW / 25));
+      span.style.animationDuration = dur.toFixed(1) + 's';
+      el.innerHTML = '';
+      el.appendChild(span);
+    });
+
+    /* click handlers */
+    list.querySelectorAll('.row-circle').forEach(circle => {
+      circle.addEventListener('click', e => {
+        e.stopPropagation();
+        openDetail(parseInt(circle.closest('.project-row').dataset.id, 10));
+      });
+    });
+    list.querySelectorAll('.project-row').forEach(row => {
+      row.addEventListener('click', e => {
+        if (e.target.closest('.row-circle')) return;
+        openDetail(parseInt(row.dataset.id, 10));
+      });
+    });
+
+    activate(currentCat);
+  }
+
+  /* ── Intro animation ────────────────────── */
+  const nameEl    = document.getElementById('moving-name');
+  const introBg   = document.getElementById('intro-bg');
+  const helloText = document.querySelector('.hello-text');
+  const gladText  = document.querySelector('.glad-text');
+  const tbBorder  = document.getElementById('top-bar-border');
+
+  function clamp(v, a, b) { return Math.min(Math.max(v, a), b); }
+
+  function getBarH() { return document.getElementById('top-bar').offsetHeight; }
+  function getPad()  { return clamp(window.innerWidth * 0.035, 16, 52); }
+
+  /* ── Intro sequence (time-based, not scroll) ── */
+
+  const ANIM_DUR  = 1600;
+  const ANIM_EASE = 'cubic-bezier(0.25, 0.1, 0.1, 1)';
+  const barMarquee = document.getElementById('bar-name-marquee');
+
+  function getNameOffset() {
+    return getPad(); /* bar name sits at left edge (var(--pad)) */
+  }
+
+  // 1. Name left-aligned, vertically centered
+  nameEl.style.fontSize  = 'clamp(16px, 5.5vw, 76px)';
+  nameEl.style.top       = '50%';
+  nameEl.style.left      = getPad() + 'px';
+  nameEl.style.transform = 'translate(0, -50%)';
+
+  // 2. After pause: name slides to bar; intro-bg fades out simultaneously
+  setTimeout(() => {
+    nameEl.style.transition = `top ${ANIM_DUR}ms ${ANIM_EASE}, left ${ANIM_DUR}ms ${ANIM_EASE}`;
+    nameEl.style.top        = (getBarH() / 2) + 'px';
+    nameEl.style.left       = getNameOffset() + 'px';
+
+    // Fade out intro-bg as name slides — reveals hello-text in hero behind it
+    introBg.style.transition = `opacity ${ANIM_DUR}ms ease`;
+    introBg.style.opacity    = '0';
+    // hello-text fades in as background lifts
+    helloText.classList.add('visible');
+
+    // 3. When name arrives: swap to marquee, show rest
+    setTimeout(() => {
+      const nameText = 'Alina Schroeder';
+      barMarquee.innerHTML = `<span class="bnm-inner">${nameText}</span>`;
+      barMarquee.classList.add('visible');
+
+      nameEl.style.transition = 'opacity 0.4s ease';
+      nameEl.style.opacity    = '0';
+      setTimeout(() => { nameEl.style.display = 'none'; }, 400);
+
+      introBg.style.display = 'none';
+      tbBorder.classList.add('visible');
+      gladText.classList.add('visible');
+    }, ANIM_DUR);
+  }, 500);
+
+  window.addEventListener('load', () => window.scrollTo(0, 0));
+
+  /* ── Prev / Next scroll through visible projects ── */
+  let currentProjectIdx = 0;
+  function getVisibleRows() {
+    return [...document.querySelectorAll('.project-row:not([hidden])')];
+  }
+  document.querySelector('.bb-left').addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const rows = getVisibleRows();
+    if (!rows.length) return;
+    const label = btn.textContent.trim();
+    if (label === 'Next') currentProjectIdx = (currentProjectIdx + 1) % rows.length;
+    else currentProjectIdx = (currentProjectIdx - 1 + rows.length) % rows.length;
+    const barH = document.getElementById('top-bar').offsetHeight;
+    const catH = document.querySelector('.cat-bar').offsetHeight;
+    const y = rows[currentProjectIdx].getBoundingClientRect().top + window.scrollY - barH - catH;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  });
+
+  /* Project detail page */
+  const CAT_LABELS = { core: 'Core Projects', foundations: 'Foundations', applied: 'Applied Design', writing: 'Writing' };
+  let PROJECTS = [];
+
+  /* Load projects from CMS-managed JSON, fall back to inline data if file unavailable */
+  fetch('./content/projects.json', { cache: 'no-store' })
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => { PROJECTS = data.projects || []; initProjects(); })
+    .catch(() => {
+      PROJECTS = [
+        { num: '001', cat: 'core',        name: 'Zwischen uns die Jahre', date: 'Nov 2025', type: 'Interactive application & analog card game', desc: 'A speculative design project exploring memory and intimacy between generations. Combines a digital archive with a tactile card game to create shared rituals around storytelling. The work questions how design can hold space for emotional complexity across time.', images: [] },
+        { num: '002', cat: 'core',        name: 'Project Title', date: 'Mar 2026', type: 'Type of work', desc: 'A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.', images: [] },
+        { num: '003', cat: 'core',        name: 'Project Title', date: 'Jun 2025', type: 'Type of work', desc: 'A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.', images: [] },
+        { num: '001', cat: 'foundations', name: 'Project Title', date: 'Jan 2026', type: 'Type of work', desc: 'A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.', images: [] },
+        { num: '002', cat: 'foundations', name: 'Project Title', date: 'Sep 2025', type: 'Type of work', desc: 'A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.', images: [] },
+        { num: '003', cat: 'foundations', name: 'Project Title', date: 'Apr 2025', type: 'Type of work', desc: 'A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.', images: [] },
+        { num: '001', cat: 'applied',     name: 'Ondra', date: 'Oct 2025', type: 'Interactive web application', desc: 'A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.', images: [] },
+        { num: '002', cat: 'applied',     name: 'Project Title', date: 'May 2025', type: 'Type of work', desc: 'A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.', images: [] },
+        { num: '003', cat: 'applied',     name: 'Project Title', date: 'Nov 2024', type: 'Type of work', desc: 'A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.', images: [] },
+        { num: '001', cat: 'writing',     name: 'Project Title', date: 'Feb 2026', type: 'Type of work', desc: 'A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.', images: [] },
+        { num: '002', cat: 'writing',     name: 'Project Title', date: 'Aug 2025', type: 'Type of work', desc: 'A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.', images: [] },
+        { num: '003', cat: 'writing',     name: 'Project Title', date: 'Mar 2025', type: 'Type of work', desc: 'A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.', images: [] },
+      ];
+      initProjects();
+    });
+
+  const detailPage  = document.getElementById('detail-page');
+  const dpNum       = document.getElementById('dp-num');
+  const dpTitle     = document.getElementById('dp-title');
+  const dpDate      = document.getElementById('dp-date');
+  const dpType      = document.getElementById('dp-type');
+  const dpDesc      = document.getElementById('dp-desc');
+  const dpCatPill   = document.getElementById('dp-cat-pill');
+  const dpNextTitle = document.getElementById('dp-next-title');
+  const dpNextBtn   = document.getElementById('dp-next-btn');
+  const dpBackBtn   = document.getElementById('dp-back-btn');
+  const dpGalFrame  = document.getElementById('dp-gallery-frame');
+  const dpGalCounter= document.getElementById('dp-gal-counter');
+  const dpGalPrev   = document.getElementById('dp-gal-prev');
+  const dpGalNext   = document.getElementById('dp-gal-next');
+
+  let galIdx = 0;
+  let galImages = [];
+  let galTotal = 0;
+  let pdfDoc = null;
+  let isPdfMode = false;
+
+  if (window['pdfjs-dist/build/pdf']) {
+    window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  function renderGallery() {
+    if (isPdfMode) { renderPdfPage(); return; }
+    const src = galImages[galIdx];
+    if (!src) {
+      dpGalFrame.innerHTML = '<div class="dp-gallery-placeholder">Image</div>';
+    } else if (/\.mp4$/i.test(src)) {
+      dpGalFrame.innerHTML = `<video src="${src}" autoplay loop muted playsinline></video>`;
+    } else {
+      dpGalFrame.innerHTML = `<img src="${src}" alt="">`;
+    }
+    dpGalCounter.textContent = `${galIdx + 1} / ${galTotal || 1}`;
+  }
+
+  async function loadPdfGallery(url) {
+    dpGalFrame.innerHTML = '<div class="dp-gallery-placeholder">Loading…</div>';
+    dpGalCounter.textContent = '…';
+    try {
+      const lib = window['pdfjs-dist/build/pdf'];
+      pdfDoc = await lib.getDocument(url).promise;
+      galTotal = pdfDoc.numPages;
+      await renderPdfPage();
+    } catch(e) {
+      dpGalFrame.innerHTML = '<div class="dp-gallery-placeholder">PDF unavailable</div>';
+    }
+  }
+
+  async function renderPdfPage() {
+    if (!pdfDoc) return;
+    const page = await pdfDoc.getPage(galIdx + 1);
+    const dpr = window.devicePixelRatio || 1;
+    const containerW = dpGalFrame.parentElement.clientWidth || (window.innerWidth - 2 * getPad());
+    const vp1 = page.getViewport({ scale: 1 });
+    const scale = (containerW / vp1.width) * dpr;
+    const vp = page.getViewport({ scale });
+    const canvas = document.createElement('canvas');
+    canvas.width = vp.width;
+    canvas.height = vp.height;
+    canvas.style.cssText = `display:block;width:${vp.width/dpr}px;height:${vp.height/dpr}px;max-width:100%`;
+    dpGalFrame.innerHTML = '';
+    dpGalFrame.appendChild(canvas);
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+    dpGalCounter.textContent = `${galIdx + 1} / ${galTotal}`;
+  }
+
+  dpGalPrev.addEventListener('click', () => {
+    if (!galTotal) return;
+    galIdx = (galIdx - 1 + galTotal) % galTotal;
+    renderGallery();
+  });
+  dpGalNext.addEventListener('click', () => {
+    if (!galTotal) return;
+    galIdx = (galIdx + 1) % galTotal;
+    renderGallery();
+  });
+
+  let currentDetailId = -1;
+  function openDetail(id) {
+    currentDetailId = id;
+    const p = PROJECTS[id];
+    if (!p) return;
+    const isDark = document.body.classList.contains('dark');
+    const col = (isDark && DARK_COLORS[p.cat]) ? DARK_COLORS[p.cat] : COLORS[p.cat];
+    detailPage.style.color = col;
+    detailPage.style.setProperty('--cat', col);
+    dpNum.textContent     = p.num;
+    dpTitle.textContent   = p.name;
+    dpDate.textContent    = p.date;
+    dpType.textContent    = p.type;
+    dpDesc.textContent    = p.desc;
+    dpCatPill.textContent = CAT_LABELS[p.cat];
+    const nextId = (id + 1) % PROJECTS.length;
+    dpNextTitle.textContent = PROJECTS[nextId].name;
+    const goNext = () => openDetail(nextId);
+    dpNextTitle.onclick = goNext;
+    dpNextBtn.onclick   = goNext;
+    /* project link */
+    const dpLink = document.getElementById('dp-link');
+    if (p.link) {
+      dpLink.href = p.link;
+      dpLink.removeAttribute('hidden');
+    } else {
+      dpLink.setAttribute('hidden', '');
+    }
+
+    /* PDF or image gallery */
+    const dpGallery = document.getElementById('dp-gallery');
+    dpGallery.removeAttribute('hidden');
+    isPdfMode = !!p.pdf;
+    galIdx = 0;
+    if (p.pdf) {
+      pdfDoc = null;
+      galImages = [];
+      galTotal = 0;
+      loadPdfGallery(p.pdf);
+    } else {
+      pdfDoc = null;
+      galImages = p.images || [];
+      galTotal = galImages.length;
+      renderGallery();
+    }
+    detailPage.removeAttribute('aria-hidden');
+    detailPage.classList.remove('closing');
+    detailPage.classList.add('open');
+    detailPage.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDetail() {
+    detailPage.classList.add('closing');
+    detailPage.classList.remove('open');
+    detailPage.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    setTimeout(() => detailPage.classList.remove('closing'), 500);
+  }
+
+  dpBackBtn.addEventListener('click', closeDetail);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && detailPage.classList.contains('open')) closeDetail();
+    if (e.key === 'Escape' && aboutPage.classList.contains('open')) closeAbout();
+  });
+
+  /* ── About page ─────────────────────────── */
+  const aboutPage      = document.getElementById('about-page');
+  const apBackBtn      = document.getElementById('ap-back-btn');
+  const apModeToggle   = document.getElementById('ap-mode-toggle');
+  const apModeIcon     = document.getElementById('ap-mode-icon');
+  const aboutSectionBtn = document.getElementById('about-section-btn');
+  const barNameMarquee = document.getElementById('bar-name-marquee');
+
+  function openAbout() {
+    aboutPage.removeAttribute('aria-hidden');
+    aboutPage.classList.remove('closing');
+    aboutPage.classList.add('open');
+    aboutPage.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeAbout() {
+    aboutPage.classList.add('closing');
+    aboutPage.classList.remove('open');
+    aboutPage.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    setTimeout(() => aboutPage.classList.remove('closing'), 500);
+  }
+
+  aboutSectionBtn.addEventListener('click', openAbout);
+  barNameMarquee.addEventListener('click', openAbout);
+  apBackBtn.addEventListener('click', closeAbout);
+  apModeToggle.addEventListener('click', () => {
+    toggleMode();
+    apModeIcon.innerHTML = darkMode ? ICON_DARK : ICON_LIGHT;
+  });
+
+  /* ── Dark / Light mode toggle ───────────── */
+  const modeToggle = document.getElementById('mode-toggle');
+  const modeIcon   = document.getElementById('mode-icon');
+
+  const ICON_LIGHT = `<path d="M8 2 A6 6 0 0 1 8 14 Z" fill="currentColor"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>`;
+  const ICON_DARK  = `<path d="M8 2 A6 6 0 0 0 8 14 Z" fill="currentColor"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>`;
+
+  let darkMode = false;
+  function toggleMode() {
+    darkMode = !darkMode;
+    document.body.classList.toggle('dark', darkMode);
+    const icon = darkMode ? ICON_DARK : ICON_LIGHT;
+    modeIcon.innerHTML = icon;
+    dpModeIcon.innerHTML = icon;
+    if (apModeIcon) apModeIcon.innerHTML = icon;
+    if (currentCat) activate(currentCat);
+    // recolor detail page if open
+    if (detailPage.classList.contains('open') && currentDetailId >= 0) {
+      const p = PROJECTS[currentDetailId];
+      const col = (darkMode && DARK_COLORS[p.cat]) ? DARK_COLORS[p.cat] : COLORS[p.cat];
+      detailPage.style.color = col;
+      detailPage.style.setProperty('--cat', col);
+    }
+  }
+  modeToggle.addEventListener('click', toggleMode);
+
+  const dpModeToggle = document.getElementById('dp-mode-toggle');
+  const dpModeIcon   = document.getElementById('dp-mode-icon');
+  dpModeToggle.addEventListener('click', toggleMode);
+
+</script>
+
+</body>
+</html>
