@@ -103,7 +103,7 @@
     {
       "num": "001",
       "cat": "writing",
-      "name": "Project Title",
+      "name": "Zwischen uns die Jahre",
       "date": "Feb 2026",
       "type": "Type of work",
       "shortDesc": "Short description for the project list — one or two sentences.",
@@ -112,9 +112,9 @@
     },
     {
       "num": "002",
-      "cat": "writing",
+      "cat": "Über Europa und über Selbstbilder",
       "name": "Project Title",
-      "date": "Aug 2025",
+      "date": "Jul 2026",
       "type": "Type of work",
       "shortDesc": "Short description for the project list — one or two sentences.",
       "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
@@ -122,7 +122,7 @@
     },
     {
       "num": "003",
-      "cat": "writing",
+      "cat": "Generationsgedanken",
       "name": "Project Title",
       "date": "Mar 2025",
       "type": "Type of work",
