@@ -43,7 +43,7 @@
     {
       "num": "001",
       "cat": "foundations",
-      "name": "Project Title",
+      "name": "From Augsburg to Lothstraße",
       "date": "Jan 2026",
       "type": "Type of work",
       "shortDesc": "Short description for the project list — one or two sentences.",
@@ -53,8 +53,8 @@
     {
       "num": "002",
       "cat": "foundations",
-      "name": "Project Title",
-      "date": "Sep 2025",
+      "name": "Interactive poster",
+      "date": "Jan 2026",
       "type": "Type of work",
       "shortDesc": "Short description for the project list — one or two sentences.",
       "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
@@ -63,8 +63,28 @@
     {
       "num": "003",
       "cat": "foundations",
-      "name": "Project Title",
+      "name": "How does AI learn?",
+      "date": "Sep 2025",
+      "type": "Type of work",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    },
+    {
+      "num": "004",
+      "cat": "foundations",
+      "name": "What energy feels like",
       "date": "Apr 2025",
+      "type": "Type of work",
+      "shortDesc": "Short description for the project list — one or two sentences.",
+      "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
+      "images": []
+    },
+    {
+      "num": "005",
+      "cat": "foundations",
+      "name": "Overclocked",
+      "date": "Jan 2026",
       "type": "Type of work",
       "shortDesc": "Short description for the project list — one or two sentences.",
       "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
@@ -73,8 +93,8 @@
     {
       "num": "001",
       "cat": "applied",
-      "name": "Ondra",
-      "date": "Oct 2025",
+      "name": "Milla Café",
+      "date": "Jul 2025",
       "type": "Interactive web application",
       "shortDesc": "Short description for the project list — one or two sentences.",
       "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
@@ -82,7 +102,7 @@
     },
     {
       "num": "002",
-      "cat": "applied",
+      "cat": "Honey",
       "name": "Project Title",
       "date": "May 2025",
       "type": "Type of work",
@@ -92,7 +112,7 @@
     },
     {
       "num": "003",
-      "cat": "applied",
+      "cat": "LeitWerk",
       "name": "Project Title",
       "date": "Nov 2024",
       "type": "Type of work",
@@ -112,8 +132,8 @@
     },
     {
       "num": "002",
-      "cat": "Über Europa und über Selbstbilder",
-      "name": "Project Title",
+      "cat": "writing",
+      "name": "Über Europa und über Selbstbilder",
       "date": "Jul 2026",
       "type": "Type of work",
       "shortDesc": "Short description for the project list — one or two sentences.",
@@ -122,8 +142,8 @@
     },
     {
       "num": "003",
-      "cat": "Generationsgedanken",
-      "name": "Project Title",
+      "cat": "writing",
+      "name": "Generationsgedanken",
       "date": "Mar 2025",
       "type": "Type of work",
       "shortDesc": "Short description for the project list — one or two sentences.",
