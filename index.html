@@ -22,6 +22,7 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
 
     :root {
       --pad: clamp(16px, 3.5vw, 52px);
@@ -881,19 +882,6 @@
     }
     .dp-link:hover { opacity: 0.5; }
 
-    /* PDF embed */
-    .dp-pdf {
-      margin-bottom: clamp(40px, 6vw, 80px);
-      border: 1.5px solid currentColor;
-      border-radius: clamp(8px, 1.5vw, 20px);
-      overflow: hidden;
-    }
-    .dp-pdf iframe {
-      display: block;
-      width: 100%;
-      height: 80vh;
-      border: none;
-    }
 
     /* Image gallery */
     .dp-gallery {
@@ -1175,9 +1163,6 @@
       </div>
       <p class="dp-desc" id="dp-desc"></p>
       <a class="dp-link" id="dp-link" href="#" target="_blank" rel="noopener" hidden>Visit Project ↗</a>
-      <div class="dp-pdf" id="dp-pdf" hidden>
-        <iframe id="dp-pdf-frame" src="" title="PDF"></iframe>
-      </div>
       <div class="dp-gallery" id="dp-gallery">
         <div class="dp-gallery-frame" id="dp-gallery-frame">Image</div>
         <div class="dp-gallery-nav">
@@ -1378,6 +1363,7 @@
     </div>
   </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   /* ── Prevent any URL hash → scroll jump ─── */
   history.scrollRestoration = 'manual';
@@ -1619,9 +1605,17 @@
 
   let galIdx = 0;
   let galImages = [];
+  let galTotal = 0;
+  let pdfDoc = null;
+  let isPdfMode = false;
+
+  if (window['pdfjs-dist/build/pdf']) {
+    window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
 
   function renderGallery() {
-    const total = galImages.length;
+    if (isPdfMode) { renderPdfPage(); return; }
     const src = galImages[galIdx];
     if (!src) {
       dpGalFrame.innerHTML = '<div class="dp-gallery-placeholder">Image</div>';
@@ -1630,15 +1624,48 @@
     } else {
       dpGalFrame.innerHTML = `<img src="${src}" alt="">`;
     }
-    dpGalCounter.textContent = `${galIdx + 1} / ${total}`;
+    dpGalCounter.textContent = `${galIdx + 1} / ${galTotal || 1}`;
+  }
+
+  async function loadPdfGallery(url) {
+    dpGalFrame.innerHTML = '<div class="dp-gallery-placeholder">Loading…</div>';
+    dpGalCounter.textContent = '…';
+    try {
+      const lib = window['pdfjs-dist/build/pdf'];
+      pdfDoc = await lib.getDocument(url).promise;
+      galTotal = pdfDoc.numPages;
+      await renderPdfPage();
+    } catch(e) {
+      dpGalFrame.innerHTML = '<div class="dp-gallery-placeholder">PDF unavailable</div>';
+    }
+  }
+
+  async function renderPdfPage() {
+    if (!pdfDoc) return;
+    const page = await pdfDoc.getPage(galIdx + 1);
+    const dpr = window.devicePixelRatio || 1;
+    const containerW = dpGalFrame.parentElement.clientWidth || (window.innerWidth - 2 * getPad());
+    const vp1 = page.getViewport({ scale: 1 });
+    const scale = (containerW / vp1.width) * dpr;
+    const vp = page.getViewport({ scale });
+    const canvas = document.createElement('canvas');
+    canvas.width = vp.width;
+    canvas.height = vp.height;
+    canvas.style.cssText = `display:block;width:${vp.width/dpr}px;height:${vp.height/dpr}px;max-width:100%`;
+    dpGalFrame.innerHTML = '';
+    dpGalFrame.appendChild(canvas);
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+    dpGalCounter.textContent = `${galIdx + 1} / ${galTotal}`;
   }
 
   dpGalPrev.addEventListener('click', () => {
-    galIdx = (galIdx - 1 + galImages.length) % galImages.length;
+    if (!galTotal) return;
+    galIdx = (galIdx - 1 + galTotal) % galTotal;
     renderGallery();
   });
   dpGalNext.addEventListener('click', () => {
-    galIdx = (galIdx + 1) % galImages.length;
+    if (!galTotal) return;
+    galIdx = (galIdx + 1) % galTotal;
     renderGallery();
   });
 
@@ -1672,19 +1699,19 @@
     }
 
     /* PDF or image gallery */
-    const dpPdf      = document.getElementById('dp-pdf');
-    const dpPdfFrame = document.getElementById('dp-pdf-frame');
-    const dpGallery  = document.getElementById('dp-gallery');
+    const dpGallery = document.getElementById('dp-gallery');
+    dpGallery.removeAttribute('hidden');
+    isPdfMode = !!p.pdf;
+    galIdx = 0;
     if (p.pdf) {
-      dpPdfFrame.src = p.pdf;
-      dpPdf.removeAttribute('hidden');
-      dpGallery.setAttribute('hidden', '');
+      pdfDoc = null;
+      galImages = [];
+      galTotal = 0;
+      loadPdfGallery(p.pdf);
     } else {
-      dpPdf.setAttribute('hidden', '');
-      dpPdfFrame.src = '';
-      dpGallery.removeAttribute('hidden');
+      pdfDoc = null;
       galImages = p.images || [];
-      galIdx = 0;
+      galTotal = galImages.length;
       renderGallery();
     }
     detailPage.removeAttribute('aria-hidden');
