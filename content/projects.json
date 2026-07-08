@@ -40,7 +40,7 @@
       "type": "Type of work",
       "shortDesc": "Short description for the project list — one or two sentences.",
       "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
-      "images": ["./media/001_BTS.mp4", "./media/002_BTS.jpg",]
+      "images": ["./media/001_BTS.mp4", "./media/002_BTS.jpg"]
     },
     {
       "num": "001",
