@@ -9,7 +9,7 @@
       "shortDesc": "A speculative design project exploring transgenerational memory — combining a digital archive with an analogue card game.",
       "desc": "Some things are passed down. Others are not.\n\n\"Between Us, the Years\" is a bachelor's thesis project exploring the transgenerational transmission of wartime experiences and their lasting effects on family and social relationships in the present day. At its core are the memories, attitudes, and relational patterns that continue to shape us across generations — often without our awareness.\n\nThe project combines an interactive digital application with an analogue dialogue and card game, opening up different ways of engaging with the subject. One part of the project can be experienced online",
       "link": "https://zwischen-uns-die-jahre.vercel.app",
-      "images": ["./media/001_core_schroeder-alina-01.mp4", "./media/002_core_schroeder-alina-02.mp4", "./media/003_core_schroeder-alina-03.jpg"]
+      "images": ["./media/001_zwischen uns die jahre.png", "./media/002_zwischen uns die jahre.png", "./media/003_zwischen uns die jahre.png"]
     },
     {
       "num": "002",
@@ -20,7 +20,7 @@
       "shortDesc": "Short description for the project list — one or two sentences.",
       "link": "https://zwischen-uns-die-jahre.vercel.app",
       "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
-      "images": []
+      "images": ["./media/001_ondra.mp4", "./media/002_ondra.png", "./media/003_ondra.png"]
     },
     {
       "num": "003",
@@ -30,7 +30,7 @@
       "type": "Type of work",
       "shortDesc": "Short description for the project list — one or two sentences.",
       "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
-      "images": []
+      "images": ["./media/001_all the water.mp4", "./media/002_all the water above me came from.jpg",]
     },
     {
       "num": "004",
@@ -40,7 +40,7 @@
       "type": "Type of work",
       "shortDesc": "Short description for the project list — one or two sentences.",
       "desc": "A fuller account of the project context, process, and outcome. Two to four sentences giving the reader a real sense of the work and what drove the decisions behind it.",
-      "images": []
+      "images": ["./media/001_BTS.mp4", "./media/002_BTS.jpg",]
     },
     {
       "num": "001",
