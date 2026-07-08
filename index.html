@@ -868,17 +868,23 @@
     }
     /* Project link */
     .dp-link {
-      display: inline-block;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
+      display: inline-flex;
+      align-items: center;
+      font-size: clamp(36px, 10vw, 76px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
       text-transform: uppercase;
       color: inherit;
       text-decoration: none;
-      border-bottom: 1.5px solid currentColor;
-      padding-bottom: 2px;
       margin-bottom: clamp(40px, 6vw, 80px);
       transition: opacity 0.15s;
+      line-height: 1;
+    }
+    .dp-link::after {
+      content: ' ↗';
+      font-size: 0.6em;
+      margin-left: 0.2em;
+      vertical-align: super;
     }
     .dp-link:hover { opacity: 0.5; }
 
@@ -1134,6 +1140,21 @@
         <h2 class="ap-heading">Skills</h2>
         <p class="ap-list">Motion Design · Interaction · Design Research · Concept Development · Photo & Film · Knowledge Transfer · Writing · Design for Understanding · DJing · Tattooing</p>
       </div>
+
+      <div class="ap-section">
+        <h2 class="ap-heading">Contact</h2>
+        <p class="ap-bio" style="margin-bottom:clamp(32px,5vw,64px)">I'm a very social person, so if you ever like to chat about something, get in touch.</p>
+        <div class="contact-grid" style="padding:0">
+          <a href="mailto:hi-alina@gmx.de" class="contact-row">
+            <span class="cr-abbr">M</span>
+            <span class="cr-main">hi-alina@gmx.de</span>
+          </a>
+          <a href="https://instagram.com/einhornfeealina" target="_blank" rel="noopener" class="contact-row">
+            <span class="cr-abbr">IG</span>
+            <span class="cr-main">@einhornfeealina</span>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1162,7 +1183,7 @@
         <div class="dp-meta-item" id="dp-type"></div>
       </div>
       <p class="dp-desc" id="dp-desc"></p>
-      <a class="dp-link" id="dp-link" href="#" target="_blank" rel="noopener" hidden>Visit Project ↗</a>
+      <a class="dp-link" id="dp-link" href="#" target="_blank" rel="noopener" hidden>Visit Project</a>
       <div class="dp-gallery" id="dp-gallery">
         <div class="dp-gallery-frame" id="dp-gallery-frame">Image</div>
         <div class="dp-gallery-nav">
@@ -1173,6 +1194,8 @@
           <button class="dp-gallery-btn" id="dp-gal-next">
             <svg viewBox="0 0 18 18"><line x1="4" y1="9" x2="14" y2="9"/><polyline points="9,4 14,9 9,14"/></svg>
           </button>
+          <button class="dp-gallery-btn dp-pdf-zoom" id="dp-zoom-out" hidden style="font-size:22px;font-weight:400">−</button>
+          <button class="dp-gallery-btn dp-pdf-zoom" id="dp-zoom-in" hidden style="font-size:22px;font-weight:400">+</button>
         </div>
       </div>
       <div class="dp-next">
@@ -1229,6 +1252,7 @@
 
     <section class="contact" id="contact">
       <div class="section-head"><span class="section-pill">Contact</span></div>
+      <p style="padding: clamp(28px,4vw,52px) var(--pad) 0; font-size:clamp(36px,10vw,76px); font-weight:400; line-height:1; letter-spacing:-0.03em; hyphens:auto; -webkit-hyphens:auto; margin-bottom:clamp(24px,3vw,40px)">I'm a very social person, so if you ever like to chat about something, get in touch.</p>
       <div class="contact-grid">
         <a href="mailto:hi-alina@gmx.de" class="contact-row">
           <span class="cr-abbr">M</span>
@@ -1608,23 +1632,47 @@
   let galTotal = 0;
   let pdfDoc = null;
   let isPdfMode = false;
+  let pdfZoom = 1.0;
 
   if (window['pdfjs-dist/build/pdf']) {
     window['pdfjs-dist/build/pdf'].GlobalWorkerOptions.workerSrc =
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   }
 
+  const dpZoomOut = document.getElementById('dp-zoom-out');
+  const dpZoomIn  = document.getElementById('dp-zoom-in');
+  dpZoomOut.addEventListener('click', () => { pdfZoom = Math.max(0.5, pdfZoom - 0.25); renderPdfPage(); });
+  dpZoomIn.addEventListener('click',  () => { pdfZoom = Math.min(3.0, pdfZoom + 0.25); renderPdfPage(); });
+
   function renderGallery() {
     if (isPdfMode) { renderPdfPage(); return; }
+    dpGalCounter.textContent = `${galIdx + 1} / ${galTotal || 1}`;
     const src = galImages[galIdx];
     if (!src) {
+      const st = detailPage.scrollTop;
+      dpGalFrame.style.width = '';
       dpGalFrame.innerHTML = '<div class="dp-gallery-placeholder">Image</div>';
+      requestAnimationFrame(() => { detailPage.scrollTop = st; });
     } else if (/\.mp4$/i.test(src)) {
-      dpGalFrame.innerHTML = `<video src="${src}" autoplay loop muted playsinline></video>`;
+      const video = document.createElement('video');
+      video.src = src; video.autoplay = true; video.loop = true; video.muted = true; video.playsInline = true;
+      const st = detailPage.scrollTop;
+      dpGalFrame.style.width = '';
+      dpGalFrame.innerHTML = '';
+      dpGalFrame.appendChild(video);
+      requestAnimationFrame(() => { detailPage.scrollTop = st; });
     } else {
-      dpGalFrame.innerHTML = `<img src="${src}" alt="">`;
+      const img = new Image();
+      img.alt = '';
+      img.onload = () => {
+        const st = detailPage.scrollTop;
+        dpGalFrame.style.width = '';
+        dpGalFrame.innerHTML = '';
+        dpGalFrame.appendChild(img);
+        detailPage.scrollTop = st;
+      };
+      img.src = src;
     }
-    dpGalCounter.textContent = `${galIdx + 1} / ${galTotal || 1}`;
   }
 
   async function loadPdfGallery(url) {
@@ -1632,8 +1680,8 @@
     dpGalCounter.textContent = '…';
     try {
       const lib = window['pdfjs-dist/build/pdf'];
-      pdfDoc = await lib.getDocument(url).promise;
-      galTotal = pdfDoc.numPages;
+      pdfDoc = await lib.getDocument(encodeURI(url)).promise;
+      galTotal = Math.ceil(pdfDoc.numPages / 2);
       await renderPdfPage();
     } catch(e) {
       dpGalFrame.innerHTML = '<div class="dp-gallery-placeholder">PDF unavailable</div>';
@@ -1642,20 +1690,49 @@
 
   async function renderPdfPage() {
     if (!pdfDoc) return;
-    const page = await pdfDoc.getPage(galIdx + 1);
     const dpr = window.devicePixelRatio || 1;
     const containerW = dpGalFrame.parentElement.clientWidth || (window.innerWidth - 2 * getPad());
-    const vp1 = page.getViewport({ scale: 1 });
-    const scale = (containerW / vp1.width) * dpr;
-    const vp = page.getViewport({ scale });
-    const canvas = document.createElement('canvas');
-    canvas.width = vp.width;
-    canvas.height = vp.height;
-    canvas.style.cssText = `display:block;width:${vp.width/dpr}px;height:${vp.height/dpr}px;max-width:100%`;
+    const leftNum = galIdx * 2 + 1;
+    const rightNum = leftNum + 1;
+    const hasRight = rightNum <= pdfDoc.numPages;
+    const gap = 12;
+    const halfW = Math.floor((containerW - gap) / 2);
+
+    /* base scale: fit page into half-width and available viewport height */
+    const maxH = window.innerHeight - 160;
+    const refPage = await pdfDoc.getPage(leftNum);
+    const vp1 = refPage.getViewport({ scale: 1 });
+    const baseScale = Math.min(halfW / vp1.width, maxH / vp1.height);
+    const scale = baseScale * pdfZoom * dpr;
+
+    async function renderCanvas(pageNum) {
+      const page = await pdfDoc.getPage(pageNum);
+      const vp = page.getViewport({ scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width;
+      canvas.height = vp.height;
+      canvas.style.cssText = `display:block;width:${vp.width/dpr}px;height:${vp.height/dpr}px`;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+      return canvas;
+    }
+
+    /* render off-screen first so old content stays visible until swap */
+    const leftCanvas  = await renderCanvas(leftNum);
+    const rightCanvas = hasRight ? await renderCanvas(rightNum) : null;
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = `display:flex;gap:${gap}px;width:100%;align-items:flex-start;justify-content:center`;
+    wrapper.appendChild(leftCanvas);
+    if (rightCanvas) wrapper.appendChild(rightCanvas);
+
+    const st = detailPage.scrollTop;
+    dpGalFrame.style.width = '100%';
     dpGalFrame.innerHTML = '';
-    dpGalFrame.appendChild(canvas);
-    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
-    dpGalCounter.textContent = `${galIdx + 1} / ${galTotal}`;
+    dpGalFrame.appendChild(wrapper);
+    detailPage.scrollTop = st;
+
+    const rightActual = Math.min(rightNum, pdfDoc.numPages);
+    dpGalCounter.textContent = `${leftNum}–${rightActual} / ${pdfDoc.numPages}`;
   }
 
   dpGalPrev.addEventListener('click', () => {
@@ -1703,6 +1780,9 @@
     dpGallery.removeAttribute('hidden');
     isPdfMode = !!p.pdf;
     galIdx = 0;
+    pdfZoom = 1.0;
+    if (isPdfMode) { dpZoomOut.removeAttribute('hidden'); dpZoomIn.removeAttribute('hidden'); }
+    else { dpZoomOut.setAttribute('hidden',''); dpZoomIn.setAttribute('hidden',''); }
     if (p.pdf) {
       pdfDoc = null;
       galImages = [];
